@@ -80,6 +80,9 @@ class Config:
         self.debug = (sys.argv[19] if len(sys.argv) > 19 else "false").lower() == "true"
         self.debug_metadata = (sys.argv[20] if len(sys.argv) > 20 else "false").lower() == "true"
 
+        # Specify upload library flag
+        self.specify_upload_library = (sys.argv[21] if len(sys.argv) > 21 else "false").lower() == "true"
+
         # Derived values
         self.tenant_url = f'https://{self.sharepoint_host_name}/sites/{self.site_name}'
         self.exclude_patterns_list = [p.strip() for p in self.exclude_patterns.split(',') if p.strip()]

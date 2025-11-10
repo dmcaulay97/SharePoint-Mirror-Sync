@@ -1089,7 +1089,8 @@ def main():
         root_item = get_drive_item_by_path(
             config.tenant_url, config.upload_path,
             config.tenant_id, config.client_id, config.client_secret,
-            config.login_endpoint, config.graph_endpoint
+            config.login_endpoint, config.graph_endpoint,
+            config.specify_upload_library
         )
 
         if not root_item:

@@ -78,6 +78,10 @@ inputs:
     description: 'Enable metadata-specific debug output (Graph API fields, column verification)'
     required: false
     default: "false"
+  specify_upload_library:
+    description: 'Allow specifying document library in upload path (first segment of path)'
+    required: false
+    default: "false"
 outputs:
   return:
     description: 'Function output'
@@ -108,5 +112,6 @@ runs:
     - ${{ inputs.debug }}
 
     - ${{ inputs.debug_metadata }}
+    - ${{ inputs.specify_upload_library }}
 
 

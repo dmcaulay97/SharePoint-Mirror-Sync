@@ -1751,7 +1751,8 @@ def delete_file_from_sharepoint(drive_item, file_path, whatif=False, file_id=Non
 
 
 def get_drive_item_by_path(site_url, folder_path, tenant_id, client_id,
-                           client_secret, login_endpoint, graph_endpoint):
+                           client_secret, login_endpoint, graph_endpoint, 
+                           specify_upload_library):
     """
     Get a drive item (file or folder) by its path using Graph API.
 
@@ -1806,18 +1807,35 @@ def get_drive_item_by_path(site_url, folder_path, tenant_id, client_id,
         site_data = site_response.json()
         site_id = site_data['id']
 
-        # Get default drive ID
-        drive_url = f"https://{graph_endpoint}/v1.0/sites/{site_id}/drive"
-        drive_response = make_graph_request_with_retry(drive_url, headers, method='GET')
+        if specify_upload_library:
+            library_name = folder_path.split('/')[0]
+            drive_url = f"https://{graph_endpoint}/v1.0/sites/{site_id}/drives"
+            drives_response = make_graph_request_with_retry(drive_url, headers, method='GET')
 
-        if drive_response.status_code != 200:
-            raise Exception(f"Failed to get drive: {drive_response.status_code}")
+            if drives_response.status_code != 200:
+                raise Exception(f"Failed to get drives: {drives_response.status_code}")
+            
+            drives_data = drives_response.json()
+            drives = drives_data.get('value', [])
+            drive_id = next((drive['id'] for drive in drives if drive.get('name') == library_name), None)
 
-        drive_data = drive_response.json()
-        drive_id = drive_data['id']
+
+        else:
+            # Get default drive ID
+            drive_url = f"https://{graph_endpoint}/v1.0/sites/{site_id}/drive"
+            drive_response = make_graph_request_with_retry(drive_url, headers, method='GET')
+
+            if drive_response.status_code != 200:
+                raise Exception(f"Failed to get drive: {drive_response.status_code}")
+
+            drive_data = drive_response.json()
+            drive_id = drive_data['id']
 
         # Get the item by path
-        encoded_path = urllib.parse.quote(folder_path.strip('/'))
+        if specify_upload_library:
+            encoded_path = urllib.parse.quote('/'.join(folder_path.split('/')[1:]).strip('/'))
+        else:
+            encoded_path = urllib.parse.quote(folder_path.strip('/'))
         item_url = f"https://{graph_endpoint}/v1.0/sites/{site_id}/drives/{drive_id}/root:/{encoded_path}"
 
         item_response = make_graph_request_with_retry(item_url, headers, method='GET')
